@@ -40,15 +40,15 @@ pol5 = [V2(682, 175), V2(708, 120), V2(735, 148), V2(739, 170)]
 rend.draw_polygon(pol3, color(0.5, 0.5, 1))
 rend.filling_polygon(pol3, color(0.5, 0.5, 1), color(0.5, 0.5, 1))
 
-# # Cuadrado 
+# Cuadrado 
 rend.draw_polygon(pol2, color(0.5,1,0.5))
 rend.filling_polygon(pol2, color(0.5,1,0.5), color(0.5,1,0.5))
 
-# # Estrella
+# Estrella
 rend.draw_polygon(pol1, color(1,0.5,0.5))
 rend.filling_polygon(pol1, color(1,0.5,0.5), color(1,0.5,0.5))
 
-# # Poligonos de la jarra
+# Poligonos de la jarra
 rend.draw_polygon(pol4, color(1,1,1))
 rend.filling_polygon(pol4, color(1,1,1), color(1,1,1))
 
