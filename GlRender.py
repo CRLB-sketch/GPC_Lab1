@@ -114,7 +114,7 @@ class Renderer(object):
         for i in range(len(polygon)):
             self.gl_line(polygon[i], polygon[ (i + 1) % len(polygon)], clr)
 
-    def filling_polygon(self, polygon : list, clr):
+    def filling_polygon(self, polygon : list, clr_check, clr_fill):
         x_min = polygon[0].x
         y_min = polygon[0].y
         x_max = polygon[0].x
@@ -131,42 +131,26 @@ class Renderer(object):
             if polygon[i].y > y_max:
                 y_max = polygon[i].y
 
-        print("------------------------------------------------------")
-        print(f"PUNTOS: MIN({x_min}, {y_min}) - MAX({x_max}, {y_max}) | Color a pintar: {clr}")
-        print("------------------------------------------------------")
-        # Ahora vamos a ver como carajos rellenar ello por medio de esos puntos
-        # self.gl_point(x_min, y_min, color(1, 0, 1)) # izquierda inferior
-        # self.gl_point(x_max, y_max, color(1, 0, 1)) # derecha superior
-        # self.gl_point(x_min, y_max, color(1, 0, 1)) # izquierda superior
-        # self.gl_point(x_max, y_min, color(1, 0, 1)) # derecha inferior
-                
-        # for y in range(y_min + 1, y_max):
-        for y in range(y_min, y_max):
-            first_pixel = -1
-            second_pixel = -1
-            for x in range(x_min, x_max+1):
-                # print(f"PUNTO VISITADO: ({x}, {y}) - {self.pixels[x][y]}")
-                if(clr == self.pixels[x][y]):
-                    # print("Mismo color")
-                    if(first_pixel == -1):
-                        first_pixel = x
-                    elif(second_pixel == -1):
-                        second_pixel = x
-                    
-                    if(first_pixel != -1 and second_pixel != -1):
-                        # print("+++++++++++++++++++++++++")
-                        # print(f"Vamos a rellenar de {first_pixel} a {second_pixel}")
-                        for c in range(first_pixel, second_pixel):
-                            # print(f"+ {c}, {y}")
-                            self.gl_point(c, y, clr)
-                        # print("+++++++++++++++++++++++++")
-                    
-                
-                # self.gl_point(x, y, color(1, 0, 0))
-            first_pixel = -1
-            second_pixel = -1
-                
-                
+        central_x = int((x_max + x_min) / 2)
+        central_y = int((y_max + y_min) / 2)
+        
+        def filling_boundary_1(x : int, y : int, clr_check, clr_fill):
+            if(self.pixels[x][y] != clr_check):
+                self.gl_point(x, y, clr_fill)                
+                filling_boundary_1(x , y + 1, clr_fill, clr_check)
+                filling_boundary_1(x - 1, y, clr_fill, clr_check)                
+                filling_boundary_1(x + 1, y, clr_fill, clr_check)
+        
+        def filling_boundary_2(x : int, y : int, clr_check, clr_fill):
+            if(self.pixels[x][y] != clr_check):
+                self.gl_point(x, y, clr_fill)
+                filling_boundary_2(x, y - 1, clr_fill, clr_check)
+                filling_boundary_2(x - 1, y, clr_fill, clr_check) 
+                filling_boundary_2(x + 1, y, clr_fill, clr_check)
+                            
+        filling_boundary_1(central_x, central_y, clr_check, clr_fill)
+        self.gl_point(central_x, central_y, color(0, 0, 0))
+        filling_boundary_2(central_x, central_y, clr_check, clr_fill)
 
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)
