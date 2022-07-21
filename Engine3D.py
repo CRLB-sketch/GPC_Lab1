@@ -1,4 +1,17 @@
-# from gl import Renderer, color, V2
+########################################################################################
+"""
+    Universidad del Valle de Guatemala
+    Graficas por Computadora
+    Laboratorio 1 - Filling any Polygon
+"""
+__author__ = "Cristian Laynez 201281"
+__status__ = "Student of Computer Science"
+
+# ! Engine 3D : Clase Principal para Iniciar el Lab
+
+# PD: Espero más adelante poder hacerlo en c++ como debe de ser 
+######################################################################################
+
 from GlRender import *
 import random
 
@@ -6,8 +19,6 @@ width = 960
 height = 540
 
 rend = Renderer(width, height)
-
-# Sugerencia: Utilizar Bounding
 
 pol1 = [ V2(165, 380), V2(185, 360), V2(180, 330),
          V2(207, 345), V2(233, 330), V2(230, 360),

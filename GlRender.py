@@ -2,15 +2,13 @@
 """
     Universidad del Valle de Guatemala
     Graficas por Computadora
-    SR2 - Lines
+    Laboratorio 1 - Filling any Polygon
 """
 __author__ = "Cristian Laynez 201281"
 __status__ = "Student of Computer Science"
 
-"""
-    Referencias: 
-    Ejemplos de Carlos hecho en clase
-"""
+# ! GL Render : Clase donde esta todo el Gl personalizado
+
 # PD: Espero más adelante poder hacerlo en c++ como debe de ser 
 ######################################################################################
 
@@ -114,7 +112,7 @@ class Renderer(object):
         for i in range(len(polygon)):
             self.gl_line(polygon[i], polygon[ (i + 1) % len(polygon)], clr)
 
-    def filling_polygon(self, polygon : list, clr_check, clr_fill):
+    def filling_polygon(self, polygon : list, clr_check : color, clr_fill : color):
         x_min = polygon[0].x
         y_min = polygon[0].y
         x_max = polygon[0].x
@@ -134,14 +132,14 @@ class Renderer(object):
         central_x = int((x_max + x_min) / 2)
         central_y = int((y_max + y_min) / 2)
         
-        def filling_boundary_1(x : int, y : int, clr_check, clr_fill):
+        def filling_boundary_1(x : int, y : int, clr_check : color, clr_fill : color):
             if(self.pixels[x][y] != clr_check):
                 self.gl_point(x, y, clr_fill)                
                 filling_boundary_1(x , y + 1, clr_fill, clr_check)
                 filling_boundary_1(x - 1, y, clr_fill, clr_check)                
                 filling_boundary_1(x + 1, y, clr_fill, clr_check)
         
-        def filling_boundary_2(x : int, y : int, clr_check, clr_fill):
+        def filling_boundary_2(x : int, y : int, clr_check : color, clr_fill : color):
             if(self.pixels[x][y] != clr_check):
                 self.gl_point(x, y, clr_fill)
                 filling_boundary_2(x, y - 1, clr_fill, clr_check)
@@ -151,6 +149,7 @@ class Renderer(object):
         filling_boundary_1(central_x, central_y, clr_check, clr_fill)
         self.gl_point(central_x, central_y, color(0, 0, 0))
         filling_boundary_2(central_x, central_y, clr_check, clr_fill)
+        # PD: Tuve que separar la recursividad en 2 para evitar problemas de "Maximum recursion depth exceeded"
 
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)
