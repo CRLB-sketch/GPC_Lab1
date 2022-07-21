@@ -1,4 +1,5 @@
-from gl import Renderer, color, V2
+# from gl import Renderer, color, V2
+from GlRender import *
 import random
 
 width = 960
@@ -25,17 +26,22 @@ pol4 = [V2(413, 177), V2(448, 159), V2(502, 88), V2(553, 53),
 pol5 = [V2(682, 175), V2(708, 120), V2(735, 148), V2(739, 170)]
 
 # Triangulo
-rend.drawPolygon(pol3, color(0.5, 0.5, 1))
-rend.fillingPolygon(pol3, color(0.5, 0.5, 1))
+rend.draw_polygon(pol3, color(0.5, 0.5, 1))
+rend.filling_polygon(pol3, color(0.5, 0.5, 1))
 
 # # Cuadrado 
-# rend.drawPolygon(pol2, color(0.5,1,0.5))
+rend.draw_polygon(pol2, color(0.5,1,0.5))
+rend.filling_polygon(pol2, color(0.5,1,0.5))
 
 # # Estrella
-# rend.drawPolygon(pol1, color(1,0.5,0.5))
+rend.draw_polygon(pol1, color(1,0.5,0.5))
+rend.filling_polygon(pol1, color(1,0.5,0.5))
 
 # # Poligonos de la jarra
-# rend.drawPolygon(pol4, color(1,1,1))
-# rend.drawPolygon(pol5, color(1,1,1))
+rend.draw_polygon(pol4, color(1,1,1))
+rend.filling_polygon(pol4, color(1,1,1))
 
-rend.glFinish("output.bmp")
+rend.draw_polygon(pol5, color(1,1,1))
+# rend.filling_polygon(pol5, color(1,1,1))
+
+rend.gl_finish("output.bmp")
