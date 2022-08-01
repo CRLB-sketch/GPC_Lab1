@@ -14,6 +14,8 @@ __status__ = "Student of Computer Science"
 import struct
 from collections import namedtuple
 
+import numpy as np
+
 # Importante clases de este ambiente
 from Obj import Obj
 from MathFake import MathFake as mf
@@ -160,23 +162,46 @@ class Renderer(object):
     def gl_load_model(self, filename : str, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)) -> None:
         model = Obj(filename)
         model_matrix = self.__gl_create_object_matrix(translate, rotate, scale)
+        model_matrix = np.matrix(model_matrix) # ! Por el momento dejaré esto por el operador "@"
         
-        # for face in model.faces:
-        #     vert_count = len(face)
-            
-        #     for vert in range(vert_count):
-        #         v0 = model.vertices[ face[vert][0] - 1]
-        #         v1 = model.vertices[ face[(vert + 1) % vert_count][0] - 1]
+        for face in model.faces:
+            vert_count = len(face)            
+            for vert in range(vert_count):
+                v0 = model.vertices[ face[vert][0] - 1]
+                v1 = model.vertices[ face[(vert + 1) % vert_count][0] - 1]
+                
+                v0 = self.__gl_transform(v0, model_matrix)
+                v1 = self.__gl_transform(v1, model_matrix)
+                
+                self.gl_line(V2(v0.x, v0.y), V2(v1.x, v1.y))
                                                         
     def __gl_create_object_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)):        
-        translation = []
+        translation = [
+            [1, 0, 0, translate.x],
+            [0, 1, 0, translate.y],
+            [0, 0, 1, translate.z],
+            [0, 0, 0, 1]
+        ]
+
+        rotation = mf.identity(4)
+
+        scale_mat = [
+            [scale.x, 0, 0, 0],
+            [0, scale.y, 0, 0],
+            [0, 0, scale.z, 0],
+            [0, 0, 0, 1]
+        ]
         
-        rotation = []
-        
-        scale_mat = []
+        return mf.multiply_matrixs([translation, rotation, scale_mat])
         
     def __gl_transform(self, vertex, matrix) -> None:
         v = V4(vertex[0], vertex[1], vertex[2], 1)
+        vt = matrix @ v # Multiplicando una matriz y un vector
+        vt = vt.tolist()[0]
+        vf = V3(vt[0] / vt[3],
+                vt[1] / vt[3],
+                vt[2] / vt[3])
+        return vf
 
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)
