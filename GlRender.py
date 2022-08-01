@@ -14,7 +14,8 @@ __status__ = "Student of Computer Science"
 import struct
 from collections import namedtuple
 
-import numpy as np
+import numpy as np # Será temporal que este numpy supongo yo
+import random
 
 # Importante clases de este ambiente
 from Obj import Obj
@@ -119,8 +120,10 @@ class Renderer(object):
     def draw_polygon(self, polygon : list, clr = None) -> None:
         for i in range(len(polygon)):
             self.gl_line(polygon[i], polygon[ (i + 1) % len(polygon)], clr)
+            
+        self.__filling_polygon(polygon, clr, clr)
 
-    def filling_polygon(self, polygon : list, clr_check : color, clr_fill : color) -> None:
+    def __filling_polygon(self, polygon : list, clr_check : color, clr_fill : color) -> None:
         x_min = polygon[0].x
         y_min = polygon[0].y
         x_max = polygon[0].x
@@ -166,14 +169,17 @@ class Renderer(object):
         
         for face in model.faces:
             vert_count = len(face)            
-            for vert in range(vert_count):
-                v0 = model.vertices[ face[vert][0] - 1]
-                v1 = model.vertices[ face[(vert + 1) % vert_count][0] - 1]
+            
+            v0 = model.vertices[ face[0][0] - 1]
+            v1 = model.vertices[ face[1][0] - 1]
+            v2 = model.vertices[ face[2][0] - 1]
+            
+            v0 = self.__gl_transform(v0, model_matrix)
+            v1 = self.__gl_transform(v1, model_matrix)
+            v2 = self.__gl_transform(v2, model_matrix)
+            
+            self.__gl_triangle_std(v0, v1, v2, color(random.random(), random.random(), random.random()))
                 
-                v0 = self.__gl_transform(v0, model_matrix)
-                v1 = self.__gl_transform(v1, model_matrix)
-                
-                self.gl_line(V2(v0.x, v0.y), V2(v1.x, v1.y))
                                                         
     def __gl_create_object_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)):        
         translation = [
@@ -194,7 +200,7 @@ class Renderer(object):
         
         return mf.multiply_matrixs([translation, rotation, scale_mat])
         
-    def __gl_transform(self, vertex, matrix) -> None:
+    def __gl_transform(self, vertex, matrix) -> V3:
         v = V4(vertex[0], vertex[1], vertex[2], 1)
         vt = matrix @ v # Multiplicando una matriz y un vector
         vt = vt.tolist()[0]
@@ -202,6 +208,60 @@ class Renderer(object):
                 vt[1] / vt[3],
                 vt[2] / vt[3])
         return vf
+    
+    def __gl_triangle_std(self, A : V3, B : V3, C : V3, clr = None) -> None:
+        
+        if A.y < B.y:
+            A, B = B, A
+        if A.y < C.y:
+            A, C = C, A
+        if B.y < C.y:
+            B, C = C, B
+
+        self.gl_line(A,B, clr)
+        self.gl_line(B,C, clr)
+        self.gl_line(C,A, clr)
+        
+        def flat_bottom(vA : V3, vB : V3, vC : V3) -> None:
+            try:
+                mBA = (vB.x - vA.x) / (vB.y - vA.y)
+                mCA = (vC.x - vA.x) / (vC.y - vA.y)
+            except:
+                pass
+            else:
+                x0 = vB.x
+                x1 = vC.x
+                for y in range(int(vB.y), int(vA.y)):
+                    self.gl_line(V2(x0, y), V2(x1, y), clr)
+                    x0 += mBA
+                    x1 += mCA
+
+        def flat_top(vA : V3, vB : V3, vC : V3) -> None:
+            try:
+                mCA = (vC.x - vA.x) / (vC.y - vA.y)
+                mCB = (vC.x - vB.x) / (vC.y - vB.y)
+            except:
+                pass
+            else:
+                x0 = vA.x
+                x1 = vB.x
+                for y in range(int(vA.y), int(vC.y), -1):
+                    self.gl_line(V2(x0, y), V2(x1, y), clr)
+                    x0 -= mCA
+                    x1 -= mCB
+
+        if B.y == C.y:
+            # Parte plana abajo
+            flat_bottom(A,B,C)
+        elif A.y == B.y:
+            # Parte plana arriba
+            flat_top(A,B,C)
+        else:
+            # Dibujo ambos tipos de triangulos
+            # Teorema de intercepto
+            D = V2( A.x + ((B.y - A.y) / (C.y - A.y)) * (C.x - A.x), B.y)
+            flat_bottom(A,B,D)
+            flat_top(B,D,C)
 
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)
