@@ -14,10 +14,8 @@ __status__ = "Student of Computer Science"
 import struct
 from collections import namedtuple
 
-import numpy as np # Será temporal que este numpy supongo yo
 import random
 
-# Importante clases de este ambiente
 from Obj import Obj
 from MathFake import MathFake as mf
 
@@ -165,7 +163,6 @@ class Renderer(object):
     def gl_load_model(self, filename : str, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)) -> None:
         model = Obj(filename)
         model_matrix = self.__gl_create_object_matrix(translate, rotate, scale)
-        model_matrix = np.matrix(model_matrix) # ! Por el momento dejaré esto por el operador "@"
         
         for face in model.faces:
             vert_count = len(face)            
@@ -202,15 +199,13 @@ class Renderer(object):
         
     def __gl_transform(self, vertex, matrix) -> V3:
         v = V4(vertex[0], vertex[1], vertex[2], 1)
-        vt = matrix @ v # Multiplicando una matriz y un vector
-        vt = vt.tolist()[0]
+        vt = mf.multiply_matrix_and_v4(matrix, v) # Multiplicando una matriz y un vector
         vf = V3(vt[0] / vt[3],
                 vt[1] / vt[3],
                 vt[2] / vt[3])
         return vf
     
-    def __gl_triangle_std(self, A : V3, B : V3, C : V3, clr = None) -> None:
-        
+    def __gl_triangle_std(self, A : V3, B : V3, C : V3, clr = None) -> None:        
         if A.y < B.y:
             A, B = B, A
         if A.y < C.y:

@@ -60,4 +60,4 @@ rend.gl_load_model("Tree.obj",
                  translate = V3(width/2, 80, 0),
                  scale = V3(250,250,250))
 
-rend.gl_finish("output.bmp")
+rend.gl_finish("output.bmp")    
