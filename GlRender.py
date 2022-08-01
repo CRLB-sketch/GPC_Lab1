@@ -2,20 +2,25 @@
 """
     Universidad del Valle de Guatemala
     Graficas por Computadora
-    Laboratorio 1 - Filling any Polygon
+    Python Render3D
 """
 __author__ = "Cristian Laynez 201281"
 __status__ = "Student of Computer Science"
 
 # ! GL Render : Clase donde esta todo el Gl personalizado
-
-# PD: Espero más adelante poder hacerlo en c++ como debe de ser 
+# Referencias de Carlos Alonso proporcionado en clase
 ######################################################################################
 
 import struct
 from collections import namedtuple
 
+# Importante clases de este ambiente
+from Obj import Obj
+from MathFake import MathFake as mf
+
 V2 = namedtuple('Point2', ['x', 'y'])
+V3 = namedtuple('Point3', ['x', 'y', 'z'])
+V4 = namedtuple('Point4', ['x', 'y', 'z', 'w'])
 
 def color(r : int, g : int, b : int): return bytes([int(b * 255), int(g * 255), int(r * 255)])
 
@@ -23,18 +28,18 @@ class Renderer(object):
     def __init__(self, width : int, height : int):
         self.__gl_init(width, height)
     
-    def __gl_init(self, width : int, height : int):               
+    def __gl_init(self, width : int, height : int) -> None:
         self.__gl_create_window(width, height) 
         self.clearColor = color(0, 0, 0)
         self.currentColor = color(1, 1, 1)   
         self.gl_clear()             
 
-    def __gl_create_window(self, width : int, height : int):
+    def __gl_create_window(self, width : int, height : int) -> None:
         self.width = width
         self.height = height
         self.gl_view_port(0, 0, self.width, self.height)
 
-    def gl_view_port(self, pos_x : int, pos_y : int, width : int, height : int):
+    def gl_view_port(self, pos_x : int, pos_y : int, width : int, height : int) -> None:
         self.vp_x = pos_x
         self.vp_y = pos_y
         self.vp_width = width
@@ -108,11 +113,12 @@ class Renderer(object):
             if offset >= limit:
                 y = y + 1 if y0 < y1 else y - 1                
                 limit += 1                
-    def draw_polygon(self, polygon : list, clr = None):
+                
+    def draw_polygon(self, polygon : list, clr = None) -> None:
         for i in range(len(polygon)):
             self.gl_line(polygon[i], polygon[ (i + 1) % len(polygon)], clr)
 
-    def filling_polygon(self, polygon : list, clr_check : color, clr_fill : color):
+    def filling_polygon(self, polygon : list, clr_check : color, clr_fill : color) -> None:
         x_min = polygon[0].x
         y_min = polygon[0].y
         x_max = polygon[0].x
@@ -132,14 +138,14 @@ class Renderer(object):
         central_x = int((x_max + x_min) / 2)
         central_y = int((y_max + y_min) / 2)
         
-        def filling_boundary_1(x : int, y : int, clr_check : color, clr_fill : color):
+        def filling_boundary_1(x : int, y : int, clr_check : color, clr_fill : color) -> None:
             if(self.pixels[x][y] != clr_check):
                 self.gl_point(x, y, clr_fill)                
                 filling_boundary_1(x , y + 1, clr_fill, clr_check)
                 filling_boundary_1(x - 1, y, clr_fill, clr_check)                
                 filling_boundary_1(x + 1, y, clr_fill, clr_check)
         
-        def filling_boundary_2(x : int, y : int, clr_check : color, clr_fill : color):
+        def filling_boundary_2(x : int, y : int, clr_check : color, clr_fill : color) -> None:
             if(self.pixels[x][y] != clr_check):
                 self.gl_point(x, y, clr_fill)
                 filling_boundary_2(x, y - 1, clr_fill, clr_check)
@@ -150,6 +156,27 @@ class Renderer(object):
         self.gl_point(central_x, central_y, color(0, 0, 0))
         filling_boundary_2(central_x, central_y, clr_check, clr_fill)
         # PD: Tuve que separar la recursividad en 2 para evitar problemas de "Maximum recursion depth exceeded"
+
+    def gl_load_model(self, filename : str, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)) -> None:
+        model = Obj(filename)
+        model_matrix = self.__gl_create_object_matrix(translate, rotate, scale)
+        
+        # for face in model.faces:
+        #     vert_count = len(face)
+            
+        #     for vert in range(vert_count):
+        #         v0 = model.vertices[ face[vert][0] - 1]
+        #         v1 = model.vertices[ face[(vert + 1) % vert_count][0] - 1]
+                                                        
+    def __gl_create_object_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)):        
+        translation = []
+        
+        rotation = []
+        
+        scale_mat = []
+        
+    def __gl_transform(self, vertex, matrix) -> None:
+        v = V4(vertex[0], vertex[1], vertex[2], 1)
 
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)
