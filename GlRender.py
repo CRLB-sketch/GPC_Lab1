@@ -25,6 +25,23 @@ V4 = namedtuple('Point4', ['x', 'y', 'z', 'w'])
 
 def color(r : int, g : int, b : int): return bytes([int(b * 255), int(g * 255), int(r * 255)])
 
+def bary_coords(A, B, C, P):
+    areaPBC = (B.y - C.y) * (P.x - C.x) + (C.x - B.x) * (P.y - C.y)
+    areaPAC = (C.y - A.y) * (P.x - C.x) + (A.x - C.x) * (P.y - C.y)
+    areaABC = (B.y - C.y) * (A.x - C.x) + (C.x - B.x) * (A.y - C.y)
+
+    try:
+        # PBC / ABC
+        u = areaPBC / areaABC
+        # PAC / ABC
+        v = areaPAC / areaABC
+        # 1 - u - v
+        w = 1 - u - v
+    except:
+        return -1, -1, -1
+    else:
+        return u, v, w
+
 class Renderer(object):
     def __init__(self, width : int, height : int):
         self.__gl_init(width, height)
@@ -34,6 +51,10 @@ class Renderer(object):
         self.clearColor = color(0, 0, 0)
         self.currentColor = color(1, 1, 1)   
         self.gl_clear()             
+        # Definir más atributos
+        self.active_shader = None
+        self.active_texture = None
+        self.dir_light = V3(0, 0, 1)
 
     def __gl_create_window(self, width : int, height : int) -> None:
         self.width = width
@@ -52,6 +73,7 @@ class Renderer(object):
 
     def gl_clear(self) -> None:
         self.pixels = [[ self.clearColor for y in range(self.height)] for x in range(self.width)]
+        self.zbuffer = [[ float('inf') for y in range(self.height)] for x in range(self.width)]
 
     def gl_clear_viewport(self, clr = None) -> None:
         for x in range(self.vp_x, self.vp_x + self.vp_width):
@@ -175,8 +197,25 @@ class Renderer(object):
             v1 = self.__gl_transform(v1, model_matrix)
             v2 = self.__gl_transform(v2, model_matrix)
             
-            self.__gl_triangle_std(v0, v1, v2, color(random.random(), random.random(), random.random()))
+            # self.__gl_triangle_std(v0, v1, v2, color(random.random(), random.random(), random.random())) # Para colores random jaja!...
+            
+            vt0 = model.texcoords[face[0][1] - 1]
+            vt1 = model.texcoords[face[1][1] - 1]
+            vt2 = model.texcoords[face[2][1] - 1]
+
+            vn0 = model.normals[face[0][2] - 1]
+            vn1 = model.normals[face[1][2] - 1]
+            vn2 = model.normals[face[2][2] - 1]
+            
+            self.__gl_triangle_bc(v0, v1, v2, tex_coords = (vt0, vt1, vt2), normals = (vn0, vn1, vn2))
+            
+            if vert_count == 4:
+                v3 = model.vertices[ face[3][0] - 1]
+                v3 = self.__gl_transform(v3, model_matrix)
+                vt3 = model.texcoords[face[3][1] - 1]
+                vn3 = model.normals[face[3][2] - 1]
                 
+                self.__gl_triangle_bc(v0, v2, v3, texCoords = (vt0, vt2, vt3), normals = (vn0, vn2, vn3))                
                                                         
     def __gl_create_object_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)):        
         translation = [
@@ -258,6 +297,41 @@ class Renderer(object):
             flat_bottom(A,B,D)
             flat_top(B,D,C)
 
+    def __gl_triangle_bc(self, A, B, C, tex_coords = (), normals = (), clr = None):
+        min_x = round(min(A.x, B.x, C.x))
+        min_y = round(min(A.y, B.y, C.y))
+        max_x = round(max(A.x, B.x, C.x))
+        max_y = round(max(A.y, B.y, C.y))
+        
+        triangle_normal = mf.cross( mf.subtract_V3(B, A), mf.subtract_V3(C, A))
+        triangle_normal = mf.divition(triangle_normal, mf.norm(triangle_normal))
+        
+        for x in range(min_x, max_x + 1):
+            for y in range(min_y, max_y + 1):
+                u, v, w = bary_coords(A, B, C, V2(x, y))
+
+                if 0<=u and 0<=v and 0<=w:
+
+                    z = A.z * u + B.z * v + C.z * w
+
+                    if 0<=x<self.width and 0<=y<self.height:
+                        if z < self.zbuffer[x][y]:
+                            self.zbuffer[x][y] = z
+
+                            if self.active_shader:
+                                r, g, b = self.active_shader(
+                                    self,
+                                    bary_coords=(u,v,w),
+                                    vColor = clr or self.currentColor,
+                                    tex_coords = tex_coords,
+                                    normals = normals,
+                                    triangle_normal = triangle_normal
+                                )
+
+                                self.gl_point(x, y, color(r,g,b))
+                            else:
+                                self.glPoint(x,y, clr)
+        
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)
         dword = lambda d : struct.pack('=l', d)
