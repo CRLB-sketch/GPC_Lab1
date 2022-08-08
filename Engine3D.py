@@ -11,7 +11,6 @@ __status__ = "Student of Computer Science"
 ######################################################################################
 
 from GlRender import *
-import random
 from Shaders import Shaders as shaders
 from Texture import Texture
 
@@ -20,11 +19,12 @@ height = 1080
 
 rend = Renderer(width, height)
 
+# rend.active_shader = shaders.gourad
 rend.active_shader = shaders.flat
-rend.active_texture = Texture("models/model.bmp")
+rend.active_texture = Texture("models/handgun_S.bmp")
 
 rend.gl_load_model(
-    "models/model.obj",
+    "models/GunS.obj",
     translate = V3(width/2, height/2, 0),
     rotate = V3(0, 180, 0), 
     scale = V3(200,200,200)

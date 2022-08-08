@@ -52,9 +52,9 @@ class Shaders:
     @staticmethod
     def gourad(render, **kwargs):
         
-        u, v, w = kwargs["baryCoords"]
+        u, v, w = kwargs["bary_coords"]
         b, g, r = kwargs["vColor"]
-        tA, tB, tC = kwargs["texCoords"]
+        tA, tB, tC = kwargs["tex_coords"]
         nA, nB, nC = kwargs["normals"]
 
         b /= 255

@@ -161,8 +161,15 @@ class MathFake:
         return pow(result, 0.5)
     
     """
+    Division / Divition:
+        Dividir lista entre el resultado de la normalización
+    Params:
+        a : Lista a dividir
+        norm : El valor normalizado que se utilizará para dividir
+    Return:
+        list: La lista con todos los valores divididos
     """
     @staticmethod
-    def divition(a : list, norm : float):
+    def divition(a : list, norm : float) -> list:
         return [(i / norm) for i in a]
     

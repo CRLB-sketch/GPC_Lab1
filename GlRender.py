@@ -215,7 +215,7 @@ class Renderer(object):
                 vt3 = model.texcoords[face[3][1] - 1]
                 vn3 = model.normals[face[3][2] - 1]
                 
-                self.__gl_triangle_bc(v0, v2, v3, texCoords = (vt0, vt2, vt3), normals = (vn0, vn2, vn3))                
+                self.__gl_triangle_bc(v0, v2, v3, tex_coords = (vt0, vt2, vt3), normals = (vn0, vn2, vn3))                
                                                         
     def __gl_create_object_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)):        
         translation = [
