@@ -26,8 +26,8 @@ rend.active_texture = Texture("models/handgun_S.bmp")
 rend.gl_load_model(
     "models/GunS.obj",
     translate = V3(width/2, height/2, 0),
-    rotate = V3(0, 180, 0), 
-    scale = V3(200,200,200)
+    rotate = V3(0, 0, 0), 
+    scale = V3(500,500,500)
 )
 
 rend.gl_finish("output.bmp")    
