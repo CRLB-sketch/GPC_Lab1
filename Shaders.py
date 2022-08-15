@@ -18,7 +18,7 @@ class Shaders:
     @staticmethod
     def flat(render, **kwargs) -> None:
         u, v, w = kwargs["bary_coords"]
-        b, g, r = kwargs["vColor"]
+        b, g, r = kwargs["v_color"]
         tA, tB, tC = kwargs["tex_coords"]
         triangle_normal = kwargs["triangle_normal"]
 
@@ -26,12 +26,12 @@ class Shaders:
         g /= 255
         r /= 255
 
-        if render.active_texture:
+        if render.active_texture1:
             # P = Au + Bv + Cw
             tU = tA[0] * u + tB[0] * v + tC[0] * w
             tV = tA[1] * u + tB[1] * v + tC[1] * w
 
-            text_color = render.active_texture.getColor(tU, tV)
+            text_color = render.active_texture1.getColor(tU, tV)
 
             b *= text_color[2]
             g *= text_color[1]
@@ -53,7 +53,7 @@ class Shaders:
     def gourad(render, **kwargs):
         
         u, v, w = kwargs["bary_coords"]
-        b, g, r = kwargs["vColor"]
+        b, g, r = kwargs["v_color"]
         tA, tB, tC = kwargs["tex_coords"]
         nA, nB, nC = kwargs["normals"]
 
@@ -61,12 +61,12 @@ class Shaders:
         g /= 255
         r /= 255
 
-        if render.active_texture:
+        if render.active_texture1:
             # P = Au + Bv + Cw
             tU = tA[0] * u + tB[0] * v + tC[0] * w
             tV = tA[1] * u + tB[1] * v + tC[1] * w
 
-            text_color = render.active_texture.getColor(tU, tV)
+            text_color = render.active_texture1.getColor(tU, tV)
 
             b *= text_color[2]
             g *= text_color[1]

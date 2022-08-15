@@ -19,13 +19,12 @@ class MathFake:
     """ 
     Identity / Identidad:
         Al ingresar un tamaño en específico te crea una matriz identidad
-
     Params:
         size - int: Tamaño de matriz identidad a crear
     Returns:
         matrix: retorna la nueva matriz identidad
     """  
-    @staticmethod
+    # @staticmethod
     def identity(size : int) -> list:
         return [[1 if x == y else 0 for y in range(0, size)] for x in range(0, size)]
     
@@ -34,7 +33,6 @@ class MathFake:
         Puedes ingresar todas las matrices que se te de la 
         REGALADA gana (siempre y cuando sean del mismo tamaño todos)
         y te lo multiplicará todo :)
-
     Params:
         all_matrixs - lista: Un listado de todas las matrices a multiplicar
     Returns:
@@ -62,7 +60,6 @@ class MathFake:
     """ 
     Multiply Matrix And V4 / Multiplicar Matriz y V4:
         Se verifica si la matriz es 4 x 4
-
     Params:
         matrix 4x4 - list 4x4: Matriz a operar
         vector4 - V4: Vector4 a operar
@@ -172,4 +169,44 @@ class MathFake:
     @staticmethod
     def divition(a : list, norm : float) -> list:
         return [(i / norm) for i in a]
+    
+    """
+    Inversion:
+        Obtener el inverso de una matriz por medio del método de gauss jordan 
+    Params:
+        matrix : La matriz a operar
+    Return:
+        list : La matriz ya con su resultado
+    """
+    @staticmethod
+    def linalg_inversion(matrix : list) -> list:
+        # Verificar que la matriz sea cuadrada
+        size = len(matrix)
+        if size != len(matrix[0]):
+            return None
+        
+        # Se juntará la matriz con una matriz identidad conforme al tamaño solicitado
+        m_identity = [[1 if x == y else 0 for y in range(0, size)] for x in range(0, size)]
+        for i in range(size):
+            matrix[i].extend(m_identity[i])
+            
+        # Algoritmo eliminación por medio del método de gauss jordan 
+        for i in range(size):
+            checking_matrix = matrix[i][i]
+            if checking_matrix == 0:
+                return "ERROR: LA MATRIZ NO ES INVERTIBLE"
+                        
+            for j in range(i, 2 * size):
+                matrix[i][j] /= checking_matrix
+            for z in range(size):
+                if z == i or matrix[z][i] == 0: continue
+                factor = matrix[z][i]
+                for j in range(i, 2*size):
+                    matrix[z][j] -= factor * matrix[i][j]
+                
+        return [[matrix[i][j] for j in range(size, len(matrix[0]))] for i in range(size)]
+    
+    def subtract(v3 : V3, eye):
+        return
+    
     

@@ -16,6 +16,8 @@ from collections import namedtuple
 
 import random
 
+from math import cos, sin, tan, pi
+
 from Obj import Obj
 from MathFake import MathFake as mf
 
@@ -25,7 +27,7 @@ V4 = namedtuple('Point4', ['x', 'y', 'z', 'w'])
 
 def color(r : int, g : int, b : int): return bytes([int(b * 255), int(g * 255), int(r * 255)])
 
-def bary_coords(A, B, C, P):
+def bary_coords(A, B, C, P) -> list:
     areaPBC = (B.y - C.y) * (P.x - C.x) + (C.x - B.x) * (P.y - C.y)
     areaPAC = (C.y - A.y) * (P.x - C.x) + (A.x - C.x) * (P.y - C.y)
     areaABC = (B.y - C.y) * (A.x - C.x) + (C.x - B.x) * (A.y - C.y)
@@ -39,8 +41,8 @@ def bary_coords(A, B, C, P):
         w = 1 - u - v
     except:
         return -1, -1, -1
-    else:
-        return u, v, w
+    
+    return u, v, w
 
 class Renderer(object):
     def __init__(self, width : int, height : int):
@@ -48,13 +50,19 @@ class Renderer(object):
     
     def __gl_init(self, width : int, height : int) -> None:
         self.__gl_create_window(width, height) 
-        self.clearColor = color(0, 0, 0)
-        self.currentColor = color(1, 1, 1)   
-        self.gl_clear()             
+        self.clear_color = color(0, 0, 0)
+        self.current_color = color(1, 1, 1)   
+        
         # Definir más atributos
         self.active_shader = None
-        self.active_texture = None
-        self.dir_light = V3(0, 0, 1)
+        # Para activar más texturas
+        self.active_texture1 = None
+        self.active_texture2 = None
+        
+        self.dir_light = V3(0, 0, -1)
+        
+        self.gl_view_matrix()        
+        self.gl_clear()             
 
     def __gl_create_window(self, width : int, height : int) -> None:
         self.width = width
@@ -66,13 +74,57 @@ class Renderer(object):
         self.vp_y = pos_y
         self.vp_width = width
         self.vp_height = height
+        
+        self.view_port_matrix = [
+            [width/2, 0, 0, pos_x + width/2],
+            [0, height/2, 0, pos_y + height/2],
+            [0, 0, 0.5, 0.5],
+            [0, 0, 0, 1]
+        ]
+        
+        self.gl_projection_matrix()
 
-    def gl_clear_color(self, r : int, g : int, b : int) -> None: self.clearColor = color(r, g, b)
+    def gl_view_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0)):
+        self.cam_matrix = self.__gl_create_object_matrix(translate, rotate)
+        self.view_matrix = mf.linalg_inversion(self.cam_matrix)
+        
+    def gl_look_at(self, eye, cam_position = V3(0, 0, 0)):
+        print()
+        # ! DAR UN OJO ++++++++++++++++++++++++++++++++++++++++++++++++
+        # forward = np.subtract(camPosition, eye)
+        # forward = forward / np.linalg.norm(forward)
 
-    def gl_color(self, r : int, g : int, b : int) -> None: self.currentColor = color(r,g,b)
+        # right = np.cross(V3(0,1,0), forward)
+        # right = right / np.linalg.norm(right)
+
+        # up = np.cross(forward, right)
+        # up = up / np.linalg.norm(up)
+
+        # self.camMatrix = np.matrix([[right[0],up[0],forward[0],camPosition[0]],
+        #                             [right[1],up[1],forward[1],camPosition[1]],
+        #                             [right[2],up[2],forward[2],camPosition[2]],
+        #                             [0,0,0,1]])
+
+        # self.viewMatrix = np.linalg.inv(self.camMatrix)
+
+    def gl_projection_matrix(self, n = 0.1, f = 1000, fov = 60) -> None:
+        aspect_ratio = self.vp_width / self.vp_height
+        t = tan( (fov * pi / 180) / 2) * n
+        r = t * aspect_ratio
+        
+        self.projection_matrix = [
+            [n/r,0,0,0],
+            [0,n/t,0,0],
+            [0,0,-(f+n)/(f-n),-(2*f*n)/(f-n)],
+            [0,0,-1,0]
+        ]
+
+    def gl_clear_color(self, r : int, g : int, b : int) -> None: self.clear_color = color(r, g, b)
+
+    def gl_color(self, r : int, g : int, b : int) -> None: self.current_color = color(r,g,b)
 
     def gl_clear(self) -> None:
-        self.pixels = [[ self.clearColor for y in range(self.height)] for x in range(self.width)]
+        self.pixels = [[ self.clear_color for y in range(self.height)] for x in range(self.width)]
         self.zbuffer = [[ float('inf') for y in range(self.height)] for x in range(self.width)]
 
     def gl_clear_viewport(self, clr = None) -> None:
@@ -82,7 +134,7 @@ class Renderer(object):
 
     def gl_point(self, x : int, y : int, clr = None) -> None:
         if ( 0 <= x < self.width) and (0 <= y < self.height):
-            self.pixels[x][y] = clr or self.currentColor
+            self.pixels[x][y] = clr or self.current_color
 
     def gl_point_vp(self, ndcX : int, ndcY : int, clr = None) -> None:
         if ndcX < -1 or ndcX > 1 or ndcY < -1 or ndcY > 1:
@@ -90,6 +142,34 @@ class Renderer(object):
         x = int((ndcX + 1) * (self.vp_width / 2) + self.vp_x)
         y = int((ndcY + 1) * (self.vp_height / 2) + self.vp_y)        
         self.gl_point(x, y, clr)
+
+    def gl_create_rotation_matrix(self, pitch = 0, yaw = 0, roll = 0):        
+        pitch *= pi / 180
+        yaw *= pi / 180
+        roll *= pi / 180
+        
+        pitch_mat = [
+            [1, 0, 0, 0],
+            [0, cos(pitch),-sin(pitch), 0],
+            [0, sin(pitch), cos(pitch), 0],
+            [0, 0, 0, 1]
+        ]
+        
+        yaw_mat = [
+            [cos(yaw), 0, sin(yaw), 0],
+            [0, 1, 0, 0],
+            [-sin(yaw), 0, cos(yaw), 0],
+            [0, 0, 0, 1]
+        ]
+        
+        roll_mat = [
+            [cos(roll),-sin(roll), 0, 0],
+            [sin(roll), cos(roll), 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ]
+        
+        return mf.multiply_matrixs([pitch_mat, yaw_mat, roll_mat])
 
     def gl_line(self, v0 : V2, v1 : V2, clr = None) -> None:
         # Implementación del algoritmo de la linea de Bresenham [ y = m * x + b ] 
@@ -185,6 +265,7 @@ class Renderer(object):
     def gl_load_model(self, filename : str, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)) -> None:
         model = Obj(filename)
         model_matrix = self.__gl_create_object_matrix(translate, rotate, scale)
+        rotation_matrix = self.gl_create_rotation_matrix(rotate[0], rotate[1], rotate[2])
         
         for face in model.faces:
             vert_count = len(face)            
@@ -196,9 +277,11 @@ class Renderer(object):
             v0 = self.__gl_transform(v0, model_matrix)
             v1 = self.__gl_transform(v1, model_matrix)
             v2 = self.__gl_transform(v2, model_matrix)
-            
-            # self.__gl_triangle_std(v0, v1, v2, color(random.random(), random.random(), random.random())) # Para colores random jaja!...
-            
+                        
+            A = self.gl_cam_transform(v0)
+            B = self.gl_cam_transform(v1)
+            C = self.gl_cam_transform(v2)
+                        
             vt0 = model.texcoords[face[0][1] - 1]
             vt1 = model.texcoords[face[1][1] - 1]
             vt2 = model.texcoords[face[2][1] - 1]
@@ -207,15 +290,27 @@ class Renderer(object):
             vn1 = model.normals[face[1][2] - 1]
             vn2 = model.normals[face[2][2] - 1]
             
-            self.__gl_triangle_bc(v0, v1, v2, tex_coords = (vt0, vt1, vt2), normals = (vn0, vn1, vn2))
+            vn0 = self.gl_dir_transform(vn0, rotation_matrix)
+            vn1 = self.gl_dir_transform(vn1, rotation_matrix)
+            vn2 = self.gl_dir_transform(vn2, rotation_matrix)
+            
+            self.__gl_triangle_bc(A, B, C, 
+                                  verts = (v0, v1, v2), 
+                                  tex_coords= (vt0, vt1, vt2), 
+                                  normals = (vn0, vn1, vn2))
             
             if vert_count == 4:
                 v3 = model.vertices[ face[3][0] - 1]
                 v3 = self.__gl_transform(v3, model_matrix)
+                D = self.gl_cam_transform(v3)
                 vt3 = model.texcoords[face[3][1] - 1]
                 vn3 = model.normals[face[3][2] - 1]
+                vn3 = self.gl_dir_transform(vn3, rotation_matrix)
                 
-                self.__gl_triangle_bc(v0, v2, v3, tex_coords = (vt0, vt2, vt3), normals = (vn0, vn2, vn3))                
+                self.__gl_triangle_bc(A, C, D, 
+                                      verts = (v0, v2, v3), 
+                                      tex_coords= (vt0, vt2, vt3), 
+                                      normals = (vn0, vn2, vn3))       
                                                         
     def __gl_create_object_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0), scale = V3(1, 1, 1)):        
         translation = [
@@ -225,7 +320,8 @@ class Renderer(object):
             [0, 0, 0, 1]
         ]
 
-        rotation = mf.identity(4)
+        # rotation = mf.identity(4)
+        rotation = self.gl_create_rotation_matrix(rotate.x, rotate.y, rotate.z) # ! OJO
 
         scale_mat = [
             [scale.x, 0, 0, 0],
@@ -243,6 +339,23 @@ class Renderer(object):
                 vt[1] / vt[3],
                 vt[2] / vt[3])
         return vf
+    
+    def gl_dir_transform(self, dir_vector, rot_matrix):
+        v = V4(dir_vector[0], dir_vector[1], dir_vector[2], 0)
+        vt = mf.multiply_matrix_and_v4(rot_matrix, v)
+        vf = V3(vt[0], vt[1], vt[2])
+        return vf # TODO listo supongo yo
+    
+    def gl_cam_transform(self, vertex):
+        v = V4(vertex[0], vertex[1], vertex[2], 1)
+        vt = mf.multiply_matrix_and_v4(
+            mf.multiply_matrixs(
+                [self.view_port_matrix, self.projection_matrix, self.view_matrix]
+            ), v)
+        vf = V3(vt[0] / vt[3],
+                vt[1] / vt[3],
+                vt[2] / vt[3])
+        return vf # TODO listo supongo yo
     
     def __gl_triangle_std(self, A : V3, B : V3, C : V3, clr = None) -> None:        
         if A.y < B.y:
@@ -290,20 +403,20 @@ class Renderer(object):
         elif A.y == B.y:
             # Parte plana arriba
             flat_top(A,B,C)
-        else:
-            # Dibujo ambos tipos de triangulos
-            # Teorema de intercepto
-            D = V2( A.x + ((B.y - A.y) / (C.y - A.y)) * (C.x - A.x), B.y)
-            flat_bottom(A,B,D)
-            flat_top(B,D,C)
+        
+        # Dibujo ambos tipos de triangulos
+        # Teorema de intercepto
+        D = V2( A.x + ((B.y - A.y) / (C.y - A.y)) * (C.x - A.x), B.y)
+        flat_bottom(A,B,D)
+        flat_top(B,D,C)
 
-    def __gl_triangle_bc(self, A, B, C, tex_coords = (), normals = (), clr = None):
+    def __gl_triangle_bc(self, A : V3, B : V3, C : V3, verts = (), tex_coords = (), normals = (), clr = None):
         min_x = round(min(A.x, B.x, C.x))
         min_y = round(min(A.y, B.y, C.y))
         max_x = round(max(A.x, B.x, C.x))
         max_y = round(max(A.y, B.y, C.y))
         
-        triangle_normal = mf.cross( mf.subtract_V3(B, A), mf.subtract_V3(C, A))
+        triangle_normal = mf.cross( mf.subtract_V3(verts[1], verts[0]), mf.subtract_V3(verts[2], verts[0]))
         triangle_normal = mf.divition(triangle_normal, mf.norm(triangle_normal))
         
         for x in range(min_x, max_x + 1):
@@ -315,14 +428,14 @@ class Renderer(object):
                     z = A.z * u + B.z * v + C.z * w
 
                     if 0<=x<self.width and 0<=y<self.height:
-                        if z < self.zbuffer[x][y]:
+                        if z < self.zbuffer[x][y] and -1 <= z <= 1:
                             self.zbuffer[x][y] = z
 
                             if self.active_shader:
                                 r, g, b = self.active_shader(
                                     self,
                                     bary_coords=(u,v,w),
-                                    vColor = clr or self.currentColor,
+                                    v_color = clr or self.current_color,
                                     tex_coords = tex_coords,
                                     normals = normals,
                                     triangle_normal = triangle_normal
