@@ -87,28 +87,17 @@ class Renderer(object):
 
     def gl_view_matrix(self, translate = V3(0, 0, 0), rotate = V3(0, 0, 0)) -> None:
         self.cam_matrix = self.__gl_create_object_matrix(translate, rotate)
-        # print(f"-BEFORE VIEW MATRIX: {self.cam_matrix}")
         self.view_matrix = mf.linalg_inversion(self.cam_matrix)
-        # print(f"VIEW RESULT MATRIX: {self.view_matrix}")
         
     def gl_look_at(self, eye : V3, cam_position = V3(0, 0, 0)) -> None:
-        # print(f"+ CAMPOSITION: {cam_position} | EYE: {eye}")
         forward = mf.subtract_V3(cam_position, eye)
-        # print(f"+ FORWARD (SUBTRACT): {forward}")
-        # print(f"+ FORWARD (NORM): { mf.norm(forward)}")
         forward = mf.divition([forward[0], forward[1], forward[2]], mf.norm(forward))
-        # print(f"+ FORWARD (DIVITION): {forward}")
         
         right = mf.cross([0, 1, 0], forward)
-        # print(f"+ RIGHT (CROSS): {right}")
         right = mf.divition(right, mf.norm(right))
-        # print(f"+ RIGHT (DIVITION): {right}")
         
         up = mf.cross(forward, right)
-        # print(f"+ UP (CROSS): {up}")
-        # print(f"+ UP (NORM): {mf.norm(up)}")
         up = mf.divition(up, mf.norm(up))
-        # print(f"+ UP (DIVITION): {up}")
         
         self.cam_matrix = [
             [right[0], up[0], forward[0], cam_position[0]],
@@ -117,10 +106,7 @@ class Renderer(object):
             [0, 0, 0, 1]
         ]
         
-        # print(f"2) BEFORE: {self.cam_matrix}")
-        # print(f"2) BEFORE: {self.cam_matrix} - \nINV: {mf.linalg_inversion(self.cam_matrix)}")
         self.view_matrix = mf.linalg_inversion(self.cam_matrix)
-        # print(f"2) RESULT: {self.view_matrix}")
 
     def gl_projection_matrix(self, n = 0.1, f = 1000, fov = 60) -> None:
         aspect_ratio = self.vp_width / self.vp_height
@@ -349,7 +335,6 @@ class Renderer(object):
         
     def __gl_transform(self, vertex, matrix) -> V3:
         v = V4(vertex[0], vertex[1], vertex[2], 1)
-        # print("TEST 1")
         vt = mf.multiply_matrix_and_v4(matrix, v) # Multiplicando una matriz y un vector
         vf = V3(vt[0] / vt[3],
                 vt[1] / vt[3],
@@ -358,16 +343,12 @@ class Renderer(object):
     
     def gl_dir_transform(self, dir_vector, rot_matrix):
         v = V4(dir_vector[0], dir_vector[1], dir_vector[2], 0)
-        # print("TEST 2")
         vt = mf.multiply_matrix_and_v4(rot_matrix, v)
         vf = V3(vt[0], vt[1], vt[2])
         return vf # TODO listo supongo yo
     
     def gl_cam_transform(self, vertex):
         v = V4(vertex[0], vertex[1], vertex[2], 1)
-        # print("+++++++++++++++++++++++++++++")
-        # print(f"TEST 3:\n{self.view_port_matrix}\n{self.projection_matrix}\n{self.view_matrix}")
-        # print("+++++++++++++++++++++++++++++")
         vt = mf.multiply_matrix_and_v4(
             mf.multiply_matrixs(
                 [self.view_port_matrix, self.projection_matrix, self.view_matrix]

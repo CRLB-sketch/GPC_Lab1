@@ -206,7 +206,3 @@ class MathFake:
                 
         return [[matrix[i][j] for j in range(size, len(matrix[0]))] for i in range(size)]
     
-    def subtract(v3 : V3, eye):
-        return
-    
-    
