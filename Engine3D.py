@@ -20,16 +20,38 @@ height = 540
 
 rend = Renderer(width, height)
 
-# rend.dir_light = V3(1,0,0)
+rend.active_texture1 = Texture("models/model.bmp")
 
-rend.active_texture1 = Texture("models/earthDay.bmp")
-rend.active_texture2 = Texture("models/earthNight.bmp")
-rend.active_shader = shaders.flat
+model_position = V3(0, 0, -10)
 
-rend.gl_load_model("models/earth.obj",
-                 translate = V3(0, 0, -10),
-                 scale = V3(0.01,0.01,0.01),
-                 rotate = V3(0,90,0))
+rend.gl_look_at(model_position, V3(-5, -2, 0))
+
+rend.active_shader = shaders.gourad
+rend.gl_load_model(
+    "models/model.obj", 
+    translate= model_position,
+    scale=V3(3, 3, 3),
+    rotate=V3(0, 0, 0)
+)
+
+rend.gl_finish("person_model.bmp")    
+
+# !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# width = 960
+# height = 540
+
+# rend = Renderer(width, height)
+
+# # rend.dir_light = V3(1,0,0)
+
+# rend.active_texture1 = Texture("models/earthDay.bmp")
+# rend.active_texture2 = Texture("models/earthNight.bmp")
+# rend.active_shader = shaders.flat
+
+# rend.gl_load_model("models/earth.obj",
+#                  translate = V3(0, 0, -10),
+#                  scale = V3(0.01,0.01,0.01),
+#                  rotate = V3(0,90,0))
 
 # !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # width = 1920
@@ -47,5 +69,3 @@ rend.gl_load_model("models/earth.obj",
 #     rotate = V3(0, 0, 0), 
 #     scale = V3(500,500,500)
 # )
-
-rend.gl_finish("output.bmp")    
