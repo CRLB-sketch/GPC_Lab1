@@ -89,3 +89,60 @@ class Shaders:
             return r, g, b
         
         return 0,0,0
+
+    @staticmethod
+    def glow(render, **kwargs):
+        
+        u, v, w = kwargs["baryCoords"]
+        b, g, r = kwargs["vColor"]
+        tA, tB, tC = kwargs["texCoords"]
+        nA, nB, nC = kwargs["normals"]
+
+        b /= 255
+        g /= 255
+        r /= 255
+
+        if render.active_texture:
+            # P = Au + Bv + Cw
+            tU = tA[0] * u + tB[0] * v + tC[0] * w
+            tV = tA[1] * u + tB[1] * v + tC[1] * w
+
+            texColor = render.active_texture.getColor(tU, tV)
+
+            b *= texColor[2]
+            g *= texColor[1]
+            r *= texColor[0]
+
+        triangle_normal = [nA[0] * u + nB[0] * v + nC[0] * w,
+                            nA[1] * u + nB[1] * v + nC[1] * w,
+                            nA[2] * u + nB[2] * v + nC[2] * w]
+
+        dir_light = [render.dir_light.x, render.dir_light.y, render.dir_light.z]
+        intensity = mf.dot(triangle_normal, mf.inverse_values_of_array_or_list(dir_light))
+
+        b *= intensity
+        g *= intensity
+        r *= intensity
+
+        cam_forward = (render.camMatrix.item(0,2),
+                        render.camMatrix.item(1,2),
+                        render.camMatrix.item(2,2))
+
+        glow_amount = 1 - mf.dot(triangle_normal, cam_forward)
+
+        if glow_amount <= 0: glow_amount = 0
+
+        yellow = (1,1,0)
+
+        b += yellow[2] * glow_amount
+        g += yellow[1] * glow_amount
+        r += yellow[0] * glow_amount
+
+        if b > 1: b = 1
+        if g > 1: g = 1
+        if r > 1: r = 1
+
+        if intensity > 0:
+            return r, g, b
+    
+        return 0, 0, 0    
