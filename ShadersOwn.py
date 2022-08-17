@@ -34,6 +34,25 @@ class ShadersOwn:
         return 0, 0, 0
 
     @staticmethod
-    def blue_transparency(render) -> None:
+    def blue_transparency(render, **kwargs) -> None:
+        u, v, w = kwargs["bary_coords"]
+        b, g, r = kwargs["v_color"]
+        tA, tB, tC = kwargs["tex_coords"]
+        nA, nB, nC = kwargs["normals"]
+        
+        b /= 255
+        g /= 255
+        r /= 255
+        
+        if render.active_texture1:
+            # P = Au + Bv + Cw
+            tU = tA[0] * u + tB[0] * v + tC[0] * w
+            tV = tA[1] * u + tB[1] * v + tC[1] * w
 
-        return 0, 0, 0
+            tex_color = render.active_texture1.getColor(tU, tV)
+
+            b *= tex_color[2]
+            g *= tex_color[1]
+            r *= tex_color[0]
+        
+        return r, g, b
