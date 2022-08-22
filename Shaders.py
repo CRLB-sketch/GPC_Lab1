@@ -31,7 +31,7 @@ class Shaders:
             tU = tA[0] * u + tB[0] * v + tC[0] * w
             tV = tA[1] * u + tB[1] * v + tC[1] * w
 
-            text_color = render.active_texture1.getColor(tU, tV)
+            text_color = render.active_texture1.get_color(tU, tV)
 
             b *= text_color[2]
             g *= text_color[1]
@@ -66,7 +66,7 @@ class Shaders:
             tU = tA[0] * u + tB[0] * v + tC[0] * w
             tV = tA[1] * u + tB[1] * v + tC[1] * w
 
-            text_color = render.active_texture1.getColor(tU, tV)
+            text_color = render.active_texture1.get_color(tU, tV)
 
             b *= text_color[2]
             g *= text_color[1]
@@ -106,7 +106,7 @@ class Shaders:
             tU = tA[0] * u + tB[0] * v + tC[0] * w
             tV = tA[1] * u + tB[1] * v + tC[1] * w
 
-            texColor = render.active_texture1.getColor(tU, tV)
+            texColor = render.active_texture1.get_color(tU, tV)
 
             b *= texColor[2]
             g *= texColor[1]
