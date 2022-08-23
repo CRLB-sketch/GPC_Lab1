@@ -20,7 +20,6 @@ height = 720
 rend = Renderer(width, height)
 
 # ! ----------------------------------------------------
-
 rend.active_texture1 = Texture("models/model.bmp")
 
 model_position = V3(0, -15, -15)
@@ -67,7 +66,7 @@ rend.gl_load_model(
 
 # ! MODELO 5 +++++++++++++++++++++++++++++++++++++++++++
 rend.active_texture1 = Texture("models/model.bmp")
-rend.active_shader = shaders.blue_transparency
+rend.active_shader = shaders.rainbow
 rend.gl_load_model(
     "models/model.obj", 
     translate= V3(-0.70, 0, 0),
@@ -76,37 +75,3 @@ rend.gl_load_model(
 )
 
 rend.gl_finish("output.bmp")
-# ! ----------------------------------------------------
-
-# rend.active_texture1 = Texture("models/Cat.bmp")
-
-# model_position = V3(0, -15, -15)
-
-# rend.gl_look_at(model_position, V3(-5, -5, 0))
-
-# rend.active_shader = shaders.glow
-# rend.gl_load_model(
-#     "models/Cat.obj", 
-#     translate= model_position,
-#     scale=V3(0.2, 0.2, 0.2),
-#     rotate=V3(0, 0, 0)
-# )
-
-# rend.gl_finish("cat_medium_shot.bmp")    
-
-# ! ----------------------------------------------------
-# rend.active_texture1 = Texture("models/Cat.bmp")
-
-# model_position = V3(0, -15, -15)
-
-# rend.gl_look_at(model_position, V3(0, -5, 0))
-
-# rend.active_shader = shaders.blue_transparency
-# rend.gl_load_model(
-#     "models/Cat.obj", 
-#     translate= model_position,
-#     scale=V3(0.2, 0.2, 0.2),
-#     rotate=V3(0, 0, 0)
-# )
-
-# rend.gl_finish("output.bmp")    

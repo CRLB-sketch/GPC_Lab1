@@ -12,12 +12,6 @@ __status__ = "Student of Computer Science"
 
 from MathFake import MathFake as mf
 
-"""
-Ideas: 
-# Wireframe: borde de un triangulo, cordenadas varicentricas # Idea de robot de oro
-# Agua: Transparencia y reflexión
-# TextureBlend: Multiplicar una textura con otra (Mezcla de texturas)
-""" 
 from random import randrange
 
 pulse = lambda val, dist : ((val*dist)%1) + .5
@@ -102,7 +96,7 @@ class ShadersOwn:
         return r, g, b
 
     @staticmethod
-    def blue_transparency(render, **kwargs) -> None:
+    def rainbow(render, **kwargs) -> None:
         u, v, w = kwargs["bary_coords"]
         b, g, r = kwargs["v_color"]
         tA, tB, tC = kwargs["tex_coords"]
@@ -140,11 +134,15 @@ class ShadersOwn:
 
         if glow_amount <= 0: glow_amount = 0        
   
-        blue = (0, 0, 1)
+        set_color = (1, 0, 1)
+        if intensity > 0.80: set_color = (0, 0, 1)
+        elif intensity > 0.60: set_color = (0, 1, 0)
+        elif intensity > 0.40: set_color = (0, 0.5, 1)
+        elif intensity > 0.20: set_color = (1, 1, 0)
 
-        b += blue[2] * glow_amount
-        g += blue[1] * glow_amount
-        r += blue[0] * glow_amount
+        b += set_color[2] * glow_amount
+        g += set_color[1] * glow_amount
+        r += set_color[0] * glow_amount
             
         if b > 1: b = 1
         if g > 1: g = 1
