@@ -14,12 +14,12 @@ __status__ = "Student of Computer Science"
 import struct
 from collections import namedtuple
 
-import random
-
 from math import cos, sin, tan, pi
-from turtle import forward, right
+from turtle import width
 
 from Obj import Obj
+from Texture import Texture
+
 from MathFake import MathFake as mf
 
 V2 = namedtuple('Point2', ['x', 'y'])
@@ -59,6 +59,8 @@ class Renderer(object):
         # Para activar más texturas
         self.active_texture1 = None
         self.active_texture2 = None
+        # Normal map
+        self.normal_map = None
         
         self.dir_light = V3(0, 0, -1)
         
@@ -445,6 +447,14 @@ class Renderer(object):
                                 self.gl_point(x, y, color(r,g,b))
                             else:
                                 self.glPoint(x,y, clr)
+        
+    def render_background(self, filename : str) -> None:
+        background = Texture(filename)        
+        for x in range(self.width):
+            for y in range(self.height):
+                tex_color = background.get_color_for_background(x, y)
+                if tex_color:
+                    self.gl_point(x, y, color(tex_color[0], tex_color[1], tex_color[2]))
         
     def gl_finish(self, filename : str) -> None:
         word = lambda w : struct.pack('=h', w)

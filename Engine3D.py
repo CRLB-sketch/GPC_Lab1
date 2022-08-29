@@ -11,6 +11,7 @@ __status__ = "Student of Computer Science"
 ######################################################################################
 
 from GlRender import *
+from Shaders import Shaders as shad
 from ShadersOwn import ShadersOwn as shaders
 from Texture import Texture
 
@@ -19,59 +20,32 @@ height = 720
 
 rend = Renderer(width, height)
 
-# ! ----------------------------------------------------
-rend.active_texture1 = Texture("models/model.bmp")
+# ! -----------------------------------------------------
+# PROBANDO NORMAL MAP
 
-model_position = V3(0, -15, -15)
+# rend.dir_light = V3(-1, 0, 0)
 
-rend.gl_look_at(V3(0, 0, 0), V3(0, 0, 1))
+# rend.active_texture1 = Texture("example_models/model.bmp")
+# rend.normal_map = Texture("example_models/model_normal.bmp")
 
-# ! MODELO 1 +++++++++++++++++++++++++++++++++++++++++++
-rend.active_shader = shaders.red_diffuse
-rend.gl_load_model(
-    "models/model.obj", 
-    translate= V3(0, 0, 0),
-    scale=V3(0.2, 0.2, 0.2),
-    rotate=V3(0, 0, 0)
-)
+# rend.active_shader = shad.normal_map
+# rend.gl_load_model(
+#     "example_models/model.obj",
+#     translate=V3(-4, 0, -10),
+#     scale=V3(4, 4, 4),
+#     rotate=V3(0, 0, 0)
+# )
 
-# ! MODELO 2 +++++++++++++++++++++++++++++++++++++++++++
-rend.active_shader = shaders.tv_cut
-rend.gl_load_model(
-    "models/model.obj", 
-    translate= V3(0.35, 0, 0),
-    scale=V3(0.2, 0.2, 0.2),
-    rotate=V3(0, 0, 0)
-)
+# rend.active_shader = shad.gourad
+# rend.gl_load_model(
+#     "example_models/model.obj",
+#     translate = V3(4, 0, -10),
+#     scale = V3(4,4,4),
+#     rotate = V3(0,0,0)
+# )
 
-# ! MODELO 3 +++++++++++++++++++++++++++++++++++++++++++
-rend.active_shader = shaders.sun_and_moon_light
-rend.gl_load_model(
-    "models/model.obj", 
-    translate= V3(0.70, 0, 0),
-    scale=V3(0.2, 0.2, 0.2),
-    rotate=V3(0, 0, 0)
-)
+# rend.gl_finish("outputs/output.bmp")
 
-# ! MODELO 4 +++++++++++++++++++++++++++++++++++++++++++
-rend.active_texture1 = Texture("models/handgun_S.bmp")
-rend.active_texture2 = Texture("models/Cat.bmp")
-rend.active_shader = shaders.mixture_textures # Trate de hacer el experimento y salio esto xd
-rend.gl_load_model(
-    "models/model.obj", 
-    translate= V3(-0.35, 0, 0),
-    scale=V3(0.2, 0.2, 0.2),
-    rotate=V3(0, 0, 0)
-)
+rend.render_background("backgrounds/backgroundP1.bmp")
 
-# ! MODELO 5 +++++++++++++++++++++++++++++++++++++++++++
-rend.active_texture1 = Texture("models/model.bmp")
-rend.active_shader = shaders.rainbow
-rend.gl_load_model(
-    "models/model.obj", 
-    translate= V3(-0.70, 0, 0),
-    scale=V3(0.2, 0.2, 0.2),
-    rotate=V3(0, 0, 0)
-)
-
-rend.gl_finish("output.bmp")
+rend.gl_finish("outputs/test_background.bmp")

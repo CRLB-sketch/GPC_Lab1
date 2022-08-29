@@ -44,4 +44,9 @@ class Texture(object):
         
         return None
 
+    def get_color_for_background(self, x, y):
+        if 0 <= x < self.width and 0 <= y < self.height:
+            return self.pixels[y][x]
+        
+        return None
 # Referencias de Carlos Alonso proporcionado en clase

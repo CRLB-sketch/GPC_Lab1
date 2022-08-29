@@ -57,6 +57,12 @@ class MathFake:
             if (m + 2) == len(all_matrixs): break            
         return result
     
+    """
+    
+    """
+    def multiply_m3x3_and_m3x1(matrix_a : list, list_b : list) -> list:
+        return [(matrix_a[i][0] * list_b[0]) + (matrix_a[i][1] * list_b[1]) + (matrix_a[i][2] * list_b[2]) for i in range(len(matrix_a))]
+    
     """ 
     Multiply Matrix And V4 / Multiplicar Matriz y V4:
         Se verifica si la matriz es 4 x 4
