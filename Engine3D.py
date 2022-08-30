@@ -20,30 +20,61 @@ height = 720
 
 rend = Renderer(width, height)
 
+# Aplicando Background chido :v
 rend.render_background("backgrounds/backgroundP1.bmp")
 
-# ! -----------------------------------------------------
-# PROBANDO NORMAL MAP
+# Preparando perspectiva de la camara
+rend.gl_look_at(V3(0, 0, 0), V3(0, 0, 1))
 
-rend.dir_light = V3(-1, 0, 0)
-
-rend.active_texture1 = Texture("example_models/model.bmp")
-rend.normal_map = Texture("example_models/model_normal.bmp")
-
-rend.active_shader = shad.normal_map
+# ! 1) Australian Dog ------------------------------------------------
+rend.active_texture1 = Texture("models/AustralianDog.bmp")
+rend.active_shader = shaders.red_diffuse
 rend.gl_load_model(
-    "example_models/model.obj",
-    translate=V3(-4, 0, -10),
-    scale=V3(4, 4, 4),
+    "models/Dog.obj",
+    translate=V3(-0.20, -0.5, 0),
+    scale=V3(0.06, 0.06, 0.06),
     rotate=V3(0, 0, 0)
 )
 
-rend.active_shader = shad.gourad
+# ! 2) Cat  ----------------------------------------------------------
+rend.active_texture1 = Texture("models/Cat.bmp")
+rend.active_shader = shaders.tv_cut
 rend.gl_load_model(
-    "example_models/model.obj",
-    translate = V3(4, 0, -10),
-    scale = V3(4,4,4),
-    rotate = V3(0,0,0)
+    "models/Cat.obj",
+    translate=V3(0.20, -0.4, 0),
+    scale=V3(0.005, 0.005, 0.005),
+    rotate=V3(0, 0, 0)
 )
 
-rend.gl_finish("outputs/output.bmp")
+# ! 3) Iguana --------------------------------------------------------
+rend.active_texture1 = Texture("models/Iguana.bmp")
+rend.active_shader = shaders.rainbow
+rend.gl_load_model(
+    "models/Iguana.obj",
+    translate=V3(0.75, -0.5, 0),
+    scale=V3(0.01, 0.01, 0.01),
+    rotate=V3(0, 0, 0)
+)
+
+# ! 4) Penguin -------------------------------------    ------------------
+rend.active_texture1 = Texture("models/Penguin.bmp")
+rend.active_texture2 = Texture("models/handgun_S.bmp")
+rend.active_shader = shaders.mixture_textures
+rend.gl_load_model(
+    "models/PenguinBaseMesh.obj",
+    translate=V3(-0.75, -0.5, 0),
+    scale=V3(0.2, 0.2, 0.2),
+    rotate=V3(0, 0, 0)
+)
+
+# ! 5) Eagle ---------------------------------------------------------
+rend.active_texture1 = Texture("models/eagle.bmp")
+rend.active_shader = shaders.sun_and_moon_light
+rend.gl_load_model(
+    "models/Eagle.obj",
+    translate=V3(0.75, 0.4, 0),
+    scale=V3(0.3, 0.3, 0.3),
+    rotate=V3(0, 0, 0)
+)
+
+rend.gl_finish("outputs/proyecto1_more_shaders.bmp")

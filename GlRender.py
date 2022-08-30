@@ -413,44 +413,14 @@ class Renderer(object):
         flat_bottom(A,B,D)
         flat_top(B,D,C)
 
-    def __gl_triangle_bc(self, A : V3, B : V3, C : V3, verts = (), tex_coords = (), normals = (), clr = None):
+    def __gl_triangle_bc(self, A : V3, B : V3, C : V3, verts = (), tex_coords = (), normals = (), clr = None):        
         min_x = round(min(A.x, B.x, C.x))
         min_y = round(min(A.y, B.y, C.y))
         max_x = round(max(A.x, B.x, C.x))
         max_y = round(max(A.y, B.y, C.y))
-                
-        # !++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        edge1 = mf.subtract_V3(verts[1], verts[0])
-        edge2 = mf.subtract_V3(verts[2], verts[0])
         
-        triangle_normal = mf.cross(edge1, edge2)
+        triangle_normal = mf.cross( mf.subtract_V3(verts[1], verts[0]), mf.subtract_V3(verts[2], verts[0]))
         triangle_normal = mf.divition(triangle_normal, mf.norm(triangle_normal))
-                
-        # ! - ERROR MAS CSM
-        # tex_coords0 = V3(tex_coords[0][0], tex_coords[0][1], tex_coords[0][2])
-        # tex_coords1 = V3(tex_coords[1][0], tex_coords[1][1], tex_coords[1][2])
-        # tex_coords2 = V3(tex_coords[2][0], tex_coords[2][1], tex_coords[2][2])
-        
-        # ! - Este si sale pero mso
-        tex_coords0 = V3(tex_coords[0][0], tex_coords[1][0], tex_coords[2][0])
-        tex_coords1 = V3(tex_coords[0][1], tex_coords[1][1], tex_coords[2][1])
-        tex_coords2 = V3(tex_coords[0][2], tex_coords[1][2], tex_coords[2][2])
-        
-        delta_uv1 = mf.subtract_V3(tex_coords1, tex_coords0)
-        delta_uv2 = mf.subtract_V3(tex_coords2, tex_coords0)
-        
-        f = 1 / (delta_uv1[0] * delta_uv2[1] - delta_uv2[0] * delta_uv1[1])
-        
-        tangent = [
-            f * (delta_uv2[1] * edge1[0] - delta_uv1[1] * edge2[0]),
-            f * (delta_uv2[1] * edge1[1] - delta_uv1[1] * edge2[1]),
-            f * (delta_uv2[1] * edge1[2] - delta_uv1[1] * edge2[2]),
-        ]
-        tangent = mf.divition(tangent, mf.norm(tangent))
-        
-        bitangent = mf.cross(triangle_normal, tangent)
-        bitangent = mf.divition(bitangent, mf.norm(bitangent))
-        # !++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
         for x in range(min_x, max_x + 1):
             for y in range(min_y, max_y + 1):
@@ -471,9 +441,7 @@ class Renderer(object):
                                     v_color = clr or self.current_color,
                                     tex_coords = tex_coords,
                                     normals = normals,
-                                    triangle_normal = triangle_normal,
-                                    tangent=tangent,
-                                    bitangent=bitangent
+                                    triangle_normal = triangle_normal
                                 )
 
                                 self.gl_point(x, y, color(r,g,b))
